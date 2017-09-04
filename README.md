@@ -1,3 +1,10 @@
+# Web3.js for Quorum
+
+This is a fork of [ethereum/web3.js](https://github.com/ethereum/web3.js) that will add some of the additional 
+functionality provided by [Quorum](https://github.com/jpmorganchase/quorum)
+
+TODO: Update the rest of the README
+
 # Migration 0.13.0 -> 0.14.0
 
 web3.js version 0.14.0 supports [multiple instances of web3](https://github.com/ethereum/web3.js/issues/297) object.
