@@ -1,5 +1,5 @@
 {
-  "name": "web3Quorum",
+  "name": "web3quorum",
   "namespace": "ethereum",
   "version": "0.20.1",
   "description": "Ethereum JavaScript API, middleware to talk to a ethereum node over RPC",
