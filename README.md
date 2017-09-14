@@ -10,22 +10,12 @@ functionality provided by [Quorum](https://github.com/jpmorganchase/quorum)
 
 ## Installation
 
-### 1. Cloned github repo
-
-1. `git clone git@github.com:coeniebeyers/web3Quorum.js.git`
-2. `cd web3Quorum.js`
-3. `npm install`
-4. cd to the project where you want to use web3Quorum
-5. `npm install <directory where web3Quorum's package.json lives>`. This can be as simple as `npm install ../web3Quorum.js`
-
-### 2. npm install
-
-TODO: Add as npm package
+`npm install web3quorum`
 
 ## Usage
 
 ```
-var Web3 = require('web3Quorum')
+var Web3 = require('web3quorum')
 var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))  // Use the ipaddress:port where your node is running
 
 console.log(web3.eth.coinbase)
