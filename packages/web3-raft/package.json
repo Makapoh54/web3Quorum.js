@@ -1,0 +1,15 @@
+{
+    "name": "web3-raft",
+    "namespace": "ethereum",
+    "version": "1.0.0-beta.26",
+    "description": "Web3 module to interact with the Raft methods exposed by Quorum.",
+    "repository": "https://github.com/coeniebeyers/web3Quorum.js/tree/1.0/packages/web3-raft",
+    "license": "LGPL-3.0",
+    "main": "src/index.js",
+    "dependencies": {
+        "web3-core": "^1.0.0-beta.26",
+        "web3-core-method": "^1.0.0-beta.26",
+        "web3-core-subscriptions": "^1.0.0-beta.26",
+        "web3-net": "^1.0.0-beta.26"
+    }
+}
