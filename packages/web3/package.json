@@ -1,7 +1,7 @@
 {
-  "name": "web3Quorum",
+  "name": "web3quorum",
   "namespace": "ethereum",
-  "version": "1.0.0-beta.26",
+  "version": "1.0.0-beta.26-quorum",
   "description": "Ethereum JavaScript API",
   "repository": "https://github.com/ethereum/web3.js/tree/master/packages/web3",
   "license": "LGPL-3.0",
@@ -43,13 +43,13 @@
     }
   ],
   "dependencies": {
-    "web3-bzz": "^1.0.0-beta.26",
-    "web3-core": "^1.0.0-beta.26",
-    "web3-eth": "^1.0.0-beta.26",
-    "web3-eth-personal": "^1.0.0-beta.26",
-    "web3-net": "^1.0.0-beta.26",
-    "web3-shh": "^1.0.0-beta.26",
-    "web3-raft": "^1.0.0-beta.26",
-    "web3-utils": "^1.0.0-beta.26"
+    "web3-bzz": "1.0.0-beta.26-quorum",
+    "web3-core": "1.0.0-beta.26-quorum",
+    "web3-eth": "1.0.0-beta.26-quorum",
+    "web3-eth-personal": "1.0.0-beta.26-quorum",
+    "web3-net": "1.0.0-beta.26-quorum",
+    "web3-raft": "1.0.0-beta.26-quorum",
+    "web3-shh": "1.0.0-beta.26-quorum",
+    "web3-utils": "1.0.0-beta.26-quorum"
   }
 }
