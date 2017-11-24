@@ -24,8 +24,7 @@ var _ = require('underscore');
 var BN = require('bn.js');
 var numberToBN = require('number-to-bn');
 var utf8 = require('utf8');
-var jsSha3 = require("js-sha3");
-
+var Hash = require("eth-lib/lib/hash");
 
 
 /**
@@ -66,6 +65,17 @@ var toBN = function(number){
     }
 };
 
+
+/**
+ * Takes and input transforms it into BN and if it is negative value, into two's complement
+ *
+ * @method toTwosComplement
+ * @param {Number|String|BN} number
+ * @return {String}
+ */
+var toTwosComplement = function (number) {
+    return '0x'+ toBN(number).toTwos(256).toString(16, 64);
+};
 
 /**
  * Checks if the given string is an address
@@ -183,7 +193,7 @@ var utf8ToHex = function(str) {
  * @returns {String} ascii string representation of hex value
  */
 var hexToUtf8 = function(hex) {
-    if (!isHex(hex))
+    if (!isHexStrict(hex))
         throw new Error('The parameter "'+ hex +'" must be a valid HEX string.');
 
     var str = "";
@@ -217,7 +227,9 @@ var hexToUtf8 = function(hex) {
  * @return {String}
  */
 var hexToNumber = function (value) {
-    if (!value) return value;
+    if (!value) {
+        return value;
+    }
 
     return toBN(value).toNumber();
 };
@@ -244,6 +256,10 @@ var hexToNumberString = function (value) {
  * @return {String}
  */
 var numberToHex = function (value) {
+    if (!isFinite(value) && !_.isString(value)) {
+        return value;
+    }
+
     var number = toBN(value);
     var result = number.toString(16);
 
@@ -282,7 +298,7 @@ var bytesToHex = function(bytes) {
 var hexToBytes = function(hex) {
     hex = hex.toString(16);
 
-    if (!isHex(hex)) {
+    if (!isHexStrict(hex)) {
         throw new Error('Given value "'+ hex +'" is not a valid hex string.');
     }
 
@@ -335,6 +351,17 @@ var toHex = function (value, returnType) {
 
 
 /**
+ * Check if string is HEX, requires a 0x in front
+ *
+ * @method isHexStrict
+ * @param {String} hex to be checked
+ * @returns {Boolean}
+ */
+var isHexStrict = function (hex) {
+    return ((_.isString(hex) || _.isNumber(hex)) && /^(-)?0x[0-9a-f]*$/i.test(hex));
+};
+
+/**
  * Check if string is HEX
  *
  * @method isHex
@@ -342,7 +369,7 @@ var toHex = function (value, returnType) {
  * @returns {Boolean}
  */
 var isHex = function (hex) {
-    return ((_.isString(hex) || _.isNumber(hex)) && /^(-)?0x[0-9a-f]+$/i.test(hex));
+    return ((_.isString(hex) || _.isNumber(hex)) && /^(-0x)?(0x)?[0-9a-f]*$/i.test(hex));
 };
 
 
@@ -394,11 +421,11 @@ var isTopic = function (topic) {
 var SHA3_NULL_S = '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
 var sha3 = function (value) {
-    if (isHex(value) && /^0x/i.test((value).toString())) {
+    if (isHexStrict(value) && /^0x/i.test((value).toString())) {
         value = hexToBytes(value);
     }
 
-    var returnValue = '0x'+ jsSha3.keccak_256(value); // jshint ignore:line
+    var returnValue = Hash.keccak256(value); // jshint ignore:line
 
     if(returnValue === SHA3_NULL_S) {
         return null;
@@ -407,7 +434,7 @@ var sha3 = function (value) {
     }
 };
 // expose the under the hood keccak256
-sha3.jsSha3 = jsSha3;
+sha3._Hash = Hash;
 
 
 module.exports = {
@@ -428,7 +455,9 @@ module.exports = {
     hexToBytes: hexToBytes,
     bytesToHex: bytesToHex,
     isHex: isHex,
+    isHexStrict: isHexStrict,
     leftPad: leftPad,
     rightPad: rightPad,
+    toTwosComplement: toTwosComplement,
     sha3: sha3
 };

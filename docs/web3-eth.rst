@@ -14,13 +14,13 @@ The ``web3-eth`` package allows you to interact with an Ethereum blockchain and 
     var Eth = require('web3-eth');
 
     // "Eth.providers.givenProvider" will be set if in an Ethereum supported browser.
-    var eth = new Eth(Eth.givenProvider || new Eth.providers.WebsocketProvider('ws://some.local-or-remote.node:8546'));
+    var eth = new Eth(Eth.givenProvider || 'ws://some.local-or-remote.node:8546');
 
 
     // or using the web3 umbrella package
 
     var Web3 = require('web3');
-    var web3 = new Web3(Web3.givenProvider || new Web3.providers.WebsocketProvider('ws://some.local-or-remote.node:8546'));
+    var web3 = new Web3(Web3.givenProvider || 'ws://some.local-or-remote.node:8546');
 
     // -> web3.eth
 
@@ -455,7 +455,7 @@ Example
 
 .. code-block:: javascript
 
-    web3.eth.blockNumber()
+    web3.eth.getBlockNumber()
     .then(console.log);
     > 2744
 
@@ -633,7 +633,7 @@ Example
 
 .. code-block:: javascript
 
-    web3.eth.getBlock(3150);
+    web3.eth.getBlock(3150)
     .then(console.log);
 
     > {
@@ -977,14 +977,16 @@ Parameters
 
 
 1. ``Object`` - The transaction object to send:
-  - ``from`` - ``String``: The address for the sending account. Uses the :ref:`web3.eth.defaultAccount <eth-defaultaccount>` property, if not specified.
+  - ``from`` - ``String|Number``: The address for the sending account. Uses the :ref:`web3.eth.defaultAccount <eth-defaultaccount>` property, if not specified. Or an address or index of a local wallet in :ref:`web3.eth.accounts.wallet <eth_accounts_wallet>`.
   - ``to`` - ``String``: (optional) The destination address of the message, left undefined for a contract-creation transaction.
   - ``value`` - ``Number|String|BN|BigNumber``: (optional) The value transferred for the transaction in :ref:`wei <what-is-wei>`, also the endowment if it's a contract-creation transaction.
   - ``gas``  - ``Number``: (optional, default: To-Be-Determined) The amount of gas to use for the transaction (unused gas is refunded).
   - ``gasPrice`` - ``Number|String|BN|BigNumber``: (optional) The price of gas for this transaction in :ref:`wei <what-is-wei>`, defaults to :ref:`web3.eth.gasPrice <eth-gasprice>`.
-  - ``data`` - ``String``: (optional) Either a `ABI byte string <https://github.com/ethereum/wiki/wiki/Solidity,-Docs-and-ABI`_ containing the data of the function call on a contract, or in the case of a contract-creation transaction the initialisation code.
+  - ``data`` - ``String``: (optional) Either a `ABI byte string <http://solidity.readthedocs.io/en/latest/abi-spec.html>`_ containing the data of the function call on a contract, or in the case of a contract-creation transaction the initialisation code.
   - ``nonce`` - ``Number``: (optional) Integer of a nonce. This allows to overwrite your own pending transactions that use the same nonce.
 2. ``callback`` - ``Function``: (optional) Optional callback, returns an error object as first parameter and the result as second.
+
+.. note:: The ``from`` property can also be an address or index from the :ref:`web3.eth.accounts.wallet <eth_accounts_wallet>`. It will then sign locally using the private key of that account, and send the transaction via :ref:`web3.eth.sendSignedTransaction() <eth-sendsignedtransaction>`.
 
 .. _eth-sendtransaction-return:
 
@@ -1049,6 +1051,7 @@ Example
 
 ------------------------------------------------------------------------------
 
+.. _eth-sendsignedtransaction:
 
 sendSignedTransaction
 =====================
@@ -1102,7 +1105,7 @@ Example
     // console.log(serializedTx.toString('hex'));
     // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
 
-    web3.eth.sendSignedTransaction(serializedTx.toString('hex'))
+    web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
     .on('receipt', console.log);
 
     > // see eth.getTransactionReceipt() for details
@@ -1116,35 +1119,28 @@ sign
 
 .. code-block:: javascript
 
-    web3.eth.sign(address, dataToSign, [, callback])
+    web3.eth.sign(dataToSign, address [, callback])
 
-Signs data from a specific account. This account needs to be unlocked.
+Signs data using a specific account. This account needs to be unlocked.
 
 ----------
 Parameters
 ----------
 
 
-1. ``String`` - Address to sign data with.
-2. ``String`` - Data to sign.
+1. ``String`` - Data to sign. If String it will be converted using :ref:`web3.utils.utf8ToHex <utils-utf8tohex>`.
+2. ``String|Number`` - Address to sign data with. Or an address or index of a local wallet in :ref:`web3.eth.accounts.wallet <eth_accounts_wallet>`.
 3. ``Function`` - (optional) Optional callback, returns an error object as first parameter and the result as second.
 
-After the hex prefix, characters correspond to ECDSA values like this:
+.. note:: The 2. ``address`` parameter can also be an address or index from the :ref:`web3.eth.accounts.wallet <eth_accounts_wallet>`. It will then sign locally using the private key of this account.
 
-.. code-block:: javascript
-    r = signature[0:64]
-    s = signature[64:128]
-    v = signature[128:130]
 
 -------
 Returns
 -------
 
 
-``Promise`` returns ``String`` - The signed data.
-
-
-Note that if you are using ``ecrecover``, ``v`` will be either `"00"` or `"01"`. As a result, in order to use this value, you will have to parse it to an integer and then add `27`. This will result in either a `27` or a `28`.
+``Promise`` returns ``String`` - The signature.
 
 
 -------
@@ -1154,9 +1150,75 @@ Example
 
 .. code-block:: javascript
 
-    web3.eth.sign("0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe", "0x9dd2c369a187b4e6b9c402f030e50743e619301ea62aa4c0737d4ef7e10a3d49")
+    web3.eth.sign("Hello world", "0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe")
     .then(console.log);
     > "0x30755ed65396facf86c53e6217c52b4daebe72aa4941d89635409de4c9c7f9466d4e9aaec7977f05e923889b33c0d0dd27d7226b6e6f56ce737465c5cfd04be400"
+
+    // the below is the same
+    web3.eth.sign(web3.utils.utf8ToHex("Hello world"), "0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe")
+    .then(console.log);
+    > "0x30755ed65396facf86c53e6217c52b4daebe72aa4941d89635409de4c9c7f9466d4e9aaec7977f05e923889b33c0d0dd27d7226b6e6f56ce737465c5cfd04be400"
+
+
+------------------------------------------------------------------------------
+
+signTransaction
+=====================
+
+.. code-block:: javascript
+
+    web3.eth.signTransaction(transactionObject, address [, callback])
+
+Signs a transaction. This account needs to be unlocked.
+
+----------
+Parameters
+----------
+
+
+1. ``Object`` - The transaction data to sign :ref:`web3.eth.sendTransaction() <eth-sendtransaction>` for more.
+2. ``String`` - Address to sign transaction with.
+3. ``Function`` - (optional) Optional callback, returns an error object as first parameter and the result as second.
+
+
+-------
+Returns
+-------
+
+
+``Promise`` returns ``Object`` - The RLP encoded transaction. The ``raw`` property can be used to send the transaction using :ref:`web3.eth.sendSignedTransaction <eth-sendsignedtransaction>`.
+
+
+-------
+Example
+-------
+
+
+.. code-block:: javascript
+
+    web3.eth.signTransaction({
+        from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0",
+        gasPrice: "20000000000",
+        gas: "21000",
+        to: '0x3535353535353535353535353535353535353535',
+        value: "1000000000000000000",
+        data: ""
+    }).then(console.log);
+    > {
+        raw: '0xf86c808504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a04f4c17305743700648bc4f6cd3038ec6f6af0df73e31757007b7f59df7bee88da07e1941b264348e80c78c4027afc65a87b0a5e43e86742b8ca0823584c6788fd0',
+        tx: {
+            nonce: '0x0',
+            gasPrice: '0x4a817c800',
+            gas: '0x5208',
+            to: '0x3535353535353535353535353535353535353535',
+            value: '0xde0b6b3a7640000',
+            input: '0x',
+            v: '0x25',
+            r: '0x4f4c17305743700648bc4f6cd3038ec6f6af0df73e31757007b7f59df7bee88d',
+            s: '0x7e1941b264348e80c78c4027afc65a87b0a5e43e86742b8ca0823584c6788fd0',
+            hash: '0xda3be87732110de6c1354c83770aae630ede9ac308d9f7b399ecfba23d923384'
+        }
+    }
 
 
 ------------------------------------------------------------------------------
@@ -1339,7 +1401,7 @@ Example
 
 .. code-block:: javascript
 
-    web3.eth.getCompilers();
+    web3.eth.getCompilers()
     .then(console.log);
     > ["lll", "solidity", "serpent"]
 
@@ -1382,7 +1444,7 @@ Example
         "   }\n" +
         "}\n";
 
-    web3.eth.compile.solidity(source);
+    web3.eth.compile.solidity(source)
     .then(console.log);
 
     > {
@@ -1459,7 +1521,7 @@ Example
 
     var source = "...";
 
-    web3.eth.compile.lll(source);
+    web3.eth.compile.lll(source)
     .then(console.log);
     > "0x603880600c6000396000f3006001600060e060020a600035048063c6888fa114601857005b6021600435602b565b8060005260206000f35b600081600702905091905056"
 
@@ -1494,7 +1556,7 @@ Returns
 
     var source = "...";
 
-    var code = web3.eth.compile.serpent(source);
+    var code = web3.eth.compile.serpent(source)
     .then(console.log);
     > "0x603880600c6000396000f3006001600060e060020a600035048063c6888fa114601857005b6021600435602b565b8060005260206000f35b600081600702905091905056"
 
@@ -1534,7 +1596,7 @@ Example
 
 .. code-block:: javascript
 
-    web3.eth.getWork();
+    web3.eth.getWork()
     .then(console.log);
     > [
       "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
@@ -1580,10 +1642,9 @@ Example
         "0x0000000000000001",
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         "0xD1FE5700000000000000000000000000D1FE5700000000000000000000000000"
-    ]);
+    ])
     .then(console.log);
     > true
 
 
 ------------------------------------------------------------------------------
-

@@ -63,7 +63,7 @@ var _parseTypeNArray = function (type) {
 var _parseNumber = function (arg) {
     var type = typeof arg;
     if (type === 'string') {
-        if (utils.isHex(arg)) {
+        if (utils.isHexStrict(arg)) {
             return new BN(arg.replace(/0x/i,''), 16);
         } else {
             return new BN(arg, 10);
@@ -184,7 +184,7 @@ var _processSoliditySha3Args = function (arg) {
         type = arg.t || arg.type;
         value = arg.v || arg.value;
 
-        // otherwise try to guess the type
+    // otherwise try to guess the type
     } else {
 
         type = utils.toHex(arg, true);
